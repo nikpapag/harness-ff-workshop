@@ -101,6 +101,14 @@
 4. Set the rego to the following and click **Save**
 
 <!---->
+
+    package pipeline_environment
+    deny[sprintf("Node OSS Can't contain any critical vulnerability '%d'", [input.NODE_OSS_CRITICAL_COUNT])] {  
+       input.NODE_OSS_CRITICAL_COUNT != 0
+    }
+
+
+<!---->
 package feature_flags
 
 deny[msg] {
