@@ -88,83 +88,30 @@
 6. Note that your application now does NOT display the special offer
 
 
+# Lab 2 - Governance/Policy as Code 
 
-
-# Lab 8 - Governance/Policy as Code
-
-### Summary: Create and apply policies as code in order to enable governance and promote self-service. In Lab 2 we saw how a user is impacted by policies in place, now is the time to create such policies
-
-**Learning Objective(s):**
-
-- Create a policy that evaluates when editing pipelines
-
-- Create a policy that evaluates during pipeline execution
-
-- Test policy enforcement
-
-**Steps**
-**Create a Policy to require Approvals**
-
-1. From the secondary menu, select **Project Settings** and select **Governance Policies**
-
-2. Click **Build a Sample Policy**
-
-3. From the suggested list select **Pipeline - Approval**  and click on next
-
-4. Click Next: Enforce Policy
-
-5. Set the values according to the table  below and confirm
-
-| Input            | Value        | Notes |
-| ---------------- | ------------ | ----- |
-| Trigger Event    |On Run|       |
-| Failure Strategy |Error & exit|       |
-
-**Test the Policy to require Approvals**
-
-1. Open your pipeline
-
-2. Try to run the pipeline and note that the failure due to lack of an approval stage
-
-3. Open the pipeline in edit mode and navigate to the “**frontend**” stage
-
-4. Before the rolling deployment step add **Harness Approval** step according to the table  below
-
-| Input            | Value            | Notes |
-| ---------------- | ---------------- | ----- |
-| Step Name        |Approval|       |
-| Type of Approval |Harness Approval|       |
-
-5. Configure the Approval step as follows
-
-| Input       | Value             | Notes |
-| ----------- | ----------------- | ----- |
-| Name        |Approval|       |
-| User Groups |All Project Users|       |
-
-6. Navigate to the “**backend**” stage
-7. Repeat steps 4-5 to add an approval **before** the canary deployment block 
-8. Click **Save** and note that the save succeeds without any policy failure
-
-
-# Lab 9 - Governance/Policy as Code (Advanced)
-
-**Create a Policy to block critical CVEs**
+**Block production toggling of feature flags outside the change control**
 
 1. From the secondary menu, select **Project Settings** and select **Policies**
 
 2. Select the **Policies** tab 
 
-3. click **+ New Policy**, set the name to **Runtime OWASP CVEs** and click **Apply**
+3. click **+ New Policy**, set the name to **Block Manual Toggle** and click **Apply**
 
 4. Set the rego to the following and click **Save**
 
 <!---->
+package feature_flags
 
-    package pipeline_environment
-    deny[sprintf("Node OSS Can't contain any critical vulnerability '%d'", [input.NODE_OSS_CRITICAL_COUNT])] {  
-       input.NODE_OSS_CRITICAL_COUNT != 0
-    }
+deny[msg] {
+	# Match flags where the "Production" environment is on ...
+	prod := input.flag.envProperties[_]
+	prod.environment == "prod"
+	prod.state == "on"
+	prod.variationMap[_].targets[_].identifier == "webinar"
+	# Show a human-friendly error message
+	msg := sprintf(`Flag '%s' cannot be enabled in "Production""`, [input.flag.name])
+}
 
 5. Select the **Policy Sets** tab
 
@@ -172,30 +119,15 @@
 
 | Input                      | Value                     | Notes |
 | -------------------------- | ------------------------- | ----- |
-| Name                       |Criticals Not Allowed|       |
-| Entity Type                |Custom|       |
-| Event Evaluation           |On Step|       |
+| Name                       |feature_flag_block_prod|       |
+| Entity Type                |Feature Flag|       |
+| Event Evaluation           |On Save|       |
 | Policy Evaluation Criteria |                           |       |
-| Policy to Evaluate         |Runtime OWASP CVEs|       |
+| Policy to Evaluate         |Block Manual Toggle|       |
 
 7. For the new policy set, toggle the **Enforced** button
 
-**Add Policy to Pipeline**
+**Test Policy**
+1. From the left hand side menu navigate to the ta
 
-1. Open your pipeline
 
-2. Go to an execution that already ran, and copy the CRITICAL output variable from the OWASP step like so:\
-   ![](https://lh7-us.googleusercontent.com/docsz/AD_4nXfYQ7ba5Q_cQ9xy2AFVZ5Mt0iZPYbyQDmBonp0pBQA13Z_IUeYdK8gRSbddtf_V3bSRfbhKWDbRSUVJTx3BTCc_VmwLIWyWLkdh89nLh0sEBA6fqQxTy0NADZ0YPZwCirNycRVGUQACdItaBotovPs5Hg6CmRpQHk5ysgV6RUlhSbIbkNxmHAo?key=cRG2cvp_PHVW0KG2Gq6Y_A)
-
-3. Select the **frontend** stage
-
-4. Before the **Rollout Deployment** Step Group, add a **Policy** type step and configure as follow
-
-| Input       | Value                                          | Notes                                                                                                                                                   |
-| ----------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Name        |Policy - No Critical CVEs|                                                                                                                                                         |
-| Entity Type |Custom|                                                                                                                                                         |
-| Policy Set  |Criticals Not Allowed| Make sure to select the Project tab in order to see your Policy Set                                                                                     |
-| Payload     |{"NODE\_OSS\_CRITICAL\_COUNT": _\<variable>_}| Set the field type to Expression, then replace _\<variable>_ with OWASP output variable CRITICAL. Go to a previous execution to copy the variable path. |
-
-5. Save the pipeline and execute. Note that the pipeline fails at the policy evaluation step due to critical vulnerabilities being found by OWASP.
