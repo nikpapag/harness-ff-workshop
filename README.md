@@ -107,11 +107,14 @@ deny[msg] {
 	# Match flags where the "Production" environment is on ...
 	prod := input.flag.envProperties[_]
 	prod.environment == "prod"
-	prod.state == "on"
+	prod.pipelineConfigured == false
 	prod.variationMap[_].targets[_].identifier == "webinar"
+	prod.variationMap[_].variation == "true"
 	# Show a human-friendly error message
 	msg := sprintf(`Flag '%s' cannot be enabled in "Production""`, [input.flag.name])
 }
+
+<----!>
 
 5. Select the **Policy Sets** tab
 
@@ -128,6 +131,8 @@ deny[msg] {
 7. For the new policy set, toggle the **Enforced** button
 
 **Test Policy**
-1. From the left hand side menu navigate to the ta
+1. From the left hand side menu navigate to the feature_flags
+2. Disable/Enable and see what happens
+3. Then navigate to targets, select the webinar target and try to display the show offer flag 
 
 
