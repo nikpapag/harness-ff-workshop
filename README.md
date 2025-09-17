@@ -101,26 +101,19 @@
 4. Set the rego to the following and click **Save**
 
 <!---->
+	package feature_flags
+	
+	deny[msg] {
+		# Match flags where the "Production" environment is on ...
+		prod := input.flag.envProperties[_]
+		prod.environment == "prod"
+		prod.pipelineConfigured == false
+		prod.variationMap[_].targets[_].identifier == "webinar"
+		prod.variationMap[_].variation == "true"
+		# Show a human-friendly error message
+		msg := sprintf(`Flag '%s' cannot be enabled in "Production""`, [input.flag.name])
+	}
 
-    package pipeline_environment
-    deny[sprintf("Node OSS Can't contain any critical vulnerability '%d'", [input.NODE_OSS_CRITICAL_COUNT])] {  
-       input.NODE_OSS_CRITICAL_COUNT != 0
-    }
-
-
-<!---->
-package feature_flags
-
-deny[msg] {
-	# Match flags where the "Production" environment is on ...
-	prod := input.flag.envProperties[_]
-	prod.environment == "prod"
-	prod.pipelineConfigured == false
-	prod.variationMap[_].targets[_].identifier == "webinar"
-	prod.variationMap[_].variation == "true"
-	# Show a human-friendly error message
-	msg := sprintf(`Flag '%s' cannot be enabled in "Production""`, [input.flag.name])
-}
 
 5. Select the **Policy Sets** tab
 
