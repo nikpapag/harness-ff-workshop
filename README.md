@@ -134,4 +134,44 @@
 2. Disable/Enable and see what happens
 3. Then navigate to targets, select the webinar target and try to display the show offer flag 
 
+# Lab 3 - Feature Flag Pipeline
+1. From the left hand side menu select pipelines
+2) Click **+ Create a Pipeline**, enter the following values, then click **Start**
+
+| Field                                  | Value            | Notes
+| -------------------------------------- | ---------------- | ------------------------------------------------------------------------------------------ |
+| Name                                   |feature_flag|                                                                                            |
+| How do you want to setup your pipeline |Inline| This indicates that Harness (rather than Git) will be the source of truth for the pipeline |
+
+3) Click **Add Stage** and select Feature Flag
+4) Enter the following values and click on **Set Up Stage**
+
+| Input           | Value           | Notes |
+| --------------- | --------------- | ----- |
+| Stage Name      |FF|       |
+
+
+4) Click **Add Step** and from the Step library select **Flag Configuration**
+| Input           | Value           | Notes |
+| --------------- | --------------- | ----- |
+| Step Name Name      |Toggle|       |
+
+5) Set all other values as runtime inputs
+
+6) From the left handside navigate to feature flags
+7) Select the flag created earlier **webinarff**
+
+8)  From the top navigation select **Flag Pipeline** and pick the pipeline created earlier
+9)  Click on **Set as Flag Pipeline**
+
+<img width="1653" height="955" alt="image" src="https://github.com/user-attachments/assets/24dd3eb1-1366-4e24-8f74-0c37a05b9eaa" />
+
+Navigate to the target and try to change the flag status
+Validate the pipeline execution 
+
+
+
+
+
+
 
