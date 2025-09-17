@@ -114,8 +114,6 @@ deny[msg] {
 	msg := sprintf(`Flag '%s' cannot be enabled in "Production""`, [input.flag.name])
 }
 
-<----!>
-
 5. Select the **Policy Sets** tab
 
 6. Click **+ New Policy Set** and configure as follows
